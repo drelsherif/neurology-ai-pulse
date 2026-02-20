@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Neurology AI Pulse</title>
+  <script>
+    // GitHub Pages SPA redirect
+    // Redirects 404s back to index.html so React Router can handle them
+    var repo = '/neurology-ai-pulse';
+    var path = window.location.pathname.replace(repo, '');
+    var search = window.location.search;
+    var hash = window.location.hash;
+    window.location.replace(
+      window.location.origin + repo + '/?p=' + encodeURIComponent(path + search) + hash
+    );
+  </script>
+</head>
+<body>Redirecting...</body>
+</html>
