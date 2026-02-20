@@ -1,4 +1,5 @@
 import React from 'react';
+import NeurologyAIPulseLogo from '../branding/NeurologyAIPulseLogo';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   HeaderBlock, TickerBlock, SectionDividerBlock, ArticleGridBlock,
@@ -86,17 +87,66 @@ const EVIDENCE_OPTIONS: ArticleItem['evidenceLevel'][] = ['High', 'Moderate', 'L
 
 export const HeaderBlockView: React.FC<{ block: HeaderBlock; update: UpdateFn<HeaderBlock>; editable?: boolean }> = ({ block, update, editable }) => {
   const { trigger: triggerLogo, input: logoInput } = useImageUpload(url => update({ logoUrl: url }));
+
+  const useAnimated = !!block.useAnimatedLogo;
+  const logoSize = block.animatedLogoSize ?? 34;
+
   return (
     <div className="block-header">
       {logoInput}
+
       {editable && (
-        <div style={{ marginBottom: 12, display: 'flex', gap: 6 }}>
-          <button className="upload-btn" onClick={triggerLogo}>{block.logoUrl ? '🔄 Change Logo' : '📁 Upload Logo'}</button>
-          {block.logoUrl && <button className="upload-btn upload-btn--danger" onClick={() => update({ logoUrl: undefined })}>✕ Remove</button>}
+        <div style={{ marginBottom: 12, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <button className="upload-btn" onClick={triggerLogo}>
+            {block.logoUrl ? '🔄 Change Logo' : '📁 Upload Logo'}
+          </button>
+          {block.logoUrl && (
+            <button className="upload-btn upload-btn--danger" onClick={() => update({ logoUrl: undefined })}>
+              ✕ Remove
+            </button>
+          )}
+
+          <button
+            className="upload-btn"
+            onClick={() => update({ useAnimatedLogo: !useAnimated })}
+            title="Toggle animated logo next to the title"
+          >
+            {useAnimated ? '✨ Animated Logo: ON' : '✨ Animated Logo: OFF'}
+          </button>
+
+          {useAnimated && (
+            <>
+              <button
+                className="upload-btn"
+                onClick={() => update({ animatedLogoSize: Math.min(64, logoSize + 4) })}
+                title="Increase animated logo size"
+              >
+                ➕ Size
+              </button>
+              <button
+                className="upload-btn"
+                onClick={() => update({ animatedLogoSize: Math.max(20, logoSize - 4) })}
+                title="Decrease animated logo size"
+              >
+                ➖ Size
+              </button>
+            </>
+          )}
         </div>
       )}
-      {block.logoUrl && <img src={block.logoUrl} alt="Logo" className="block-header__logo" />}
-      <Editable value={block.title} tag="h1" className="block-header__title" onChange={v => update({ title: v })} placeholder="Newsletter Title" />
+
+      <div className="block-header__titleRow">
+        <div className="block-header__titleLogo">
+          {useAnimated ? (
+            <NeurologyAIPulseLogo size={logoSize} showWordmark={false} theme="dark" />
+          ) : (
+            block.logoUrl ? <img src={block.logoUrl} alt="Logo" className="block-header__logo" /> : null
+          )}
+        </div>
+
+        <Editable value={block.title} tag="h1" className="block-header__title" onChange={v => update({ title: v })} placeholder="Newsletter Title" />
+      </div>
+
       <Editable value={block.subtitle} className="block-header__subtitle" onChange={v => update({ subtitle: v })} placeholder="Subtitle" />
       <div className="block-header__meta">
         <Editable value={block.issueNumber} onChange={v => update({ issueNumber: v })} placeholder="Issue 001" style={{ display: 'inline' }} />

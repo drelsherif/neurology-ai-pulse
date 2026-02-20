@@ -167,25 +167,12 @@ export function exportToPDF(newsletter: Newsletter): void {
       margin: 12mm 14mm;
     }
     @media print {
-      html, body {
-        width: 210mm;
-        print-color-adjust: exact;
-        -webkit-print-color-adjust: exact;
-      }
-      .newsletter-preview {
-        max-width: 100%;
-        box-shadow: none !important;
-      }
-      .block-ticker {
-        overflow: hidden;
-      }
-      .ticker-inner {
-        animation: none !important;
-      }
-      a { color: inherit; text-decoration: none; }
+      /* Freeze animated logo for printing */
+      .logo-mark-anim { animation: none !important; filter: none !important; }
+      .eeg-wave-anim { animation: none !important; stroke-dashoffset: 0 !important; opacity: 1 !important; }
+      .soma-pulse { animation: none !important; }
     }
   `;
-
   const fullHTML = html.replace('</style>', printCSS + '</style>');
 
   // Open in a new window and trigger print dialog

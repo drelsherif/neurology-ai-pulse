@@ -49,9 +49,8 @@ export interface BlockBase {
   blockWidth?: '25' | '50' | '75' | '100'; // % width within its column
 }
 
-export interface HeaderBlock extends BlockBase {
-  type: 'header';
-  logoUrl?: string;
+\1  useAnimatedLogo?: boolean;
+  animatedLogoSize?: number;
   title: string;
   subtitle: string;
   issueNumber: string;

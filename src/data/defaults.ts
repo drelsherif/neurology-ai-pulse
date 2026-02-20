@@ -46,6 +46,9 @@ export function createDefaultNewsletter(): Newsletter {
       [headerId]: {
         id: headerId,
         type: 'header',
+        logoUrl: undefined,
+        useAnimatedLogo: true,
+        animatedLogoSize: 34,
         title: 'The Neurology AI Pulse',
         subtitle: 'Artificial Intelligence in Clinical Neuroscience',
         issueNumber: 'Issue 001',

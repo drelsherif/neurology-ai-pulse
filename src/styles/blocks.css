@@ -27,6 +27,53 @@
   margin-bottom: 16px;
 }
 
+
+/* Title row: logo + title */
+.block-header__titleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.block-header__titleLogo {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.block-header__titleRow .block-header__title {
+  margin-bottom: 0;
+}
+
+/* Animated logo (SVG) */
+@keyframes eegPulse {
+  0%   { stroke-dashoffset: 200; opacity: 0; }
+  10%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0.6; }
+}
+
+@keyframes glowPulse {
+  0%,100% { filter: drop-shadow(0 0 3px rgba(0,156,222,0.4)); }
+  50%     { filter: drop-shadow(0 0 10px rgba(0,156,222,0.9)); }
+}
+
+@keyframes nodePulse {
+  0%,100% { r: 3; opacity: 0.6; }
+  50%     { r: 4.5; opacity: 1; }
+}
+
+.eeg-wave-anim {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: eegPulse 2.8s ease-in-out infinite;
+}
+
+.logo-mark-anim { animation: glowPulse 2.8s ease-in-out infinite; }
+
+.soma-pulse { animation: nodePulse 2.8s ease-in-out infinite; }
+
 .block-header__title {
   font-family: var(--font-heading);
   font-size: 2.4rem;
