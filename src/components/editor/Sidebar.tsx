@@ -196,24 +196,64 @@ const BlockColorPanel: React.FC<{ block: Block; onUpdate: (updates: Partial<Bloc
 
       {/* Font size */}
       <div style={{ marginBottom: 10 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-text)' }}>Font Size</span>
-          <span style={{ fontSize: '0.68rem', color: 'var(--color-muted)' }}>{block.blockFontSize ? `${block.blockFontSize}px` : 'default'}</span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--color-muted)' }}>
+            {block.blockFontSize ? `${block.blockFontSize}px` : 'default'}
+          </span>
         </div>
-        <input type="range" min="10" max="24" step="1"
-          value={block.blockFontSize ?? 14}
-          onChange={e => onUpdate({ blockFontSize: Number(e.target.value) } as any)}
-          style={{ width: '100%', accentColor: 'var(--color-accent)' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', color: 'var(--color-muted)' }}>
-          <span>10px</span><span>24px</span>
+
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {[
+            { key: 'sm', label: 'Small', px: 12 },
+            { key: 'md', label: 'Medium', px: undefined },
+            { key: 'lg', label: 'Large', px: 16 },
+            { key: 'xl', label: 'XL', px: 18 },
+          ].map(opt => {
+            const active = (opt.px === undefined && !block.blockFontSize) || (opt.px != null && block.blockFontSize === opt.px);
+            return (
+              <button
+                key={opt.key}
+                onClick={() => onUpdate({ blockFontSize: opt.px } as any)}
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: 10,
+                  border: active ? '1px solid var(--color-accent)' : '1px solid rgba(255,255,255,0.10)',
+                  background: active ? 'rgba(0,156,222,0.14)' : 'rgba(0,0,0,0.12)',
+                  color: 'var(--color-text)',
+                  cursor: 'pointer',
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                }}
+                title={opt.px ? `${opt.px}px` : 'Use default'}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+          {block.blockFontSize && (
+            <button
+              onClick={() => onUpdate({ blockFontSize: undefined } as any)}
+              style={{
+                padding: '6px 10px',
+                borderRadius: 10,
+                border: '1px solid rgba(255,255,255,0.10)',
+                background: 'rgba(0,0,0,0.12)',
+                color: 'var(--color-muted)',
+                cursor: 'pointer',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+              }}
+              title="Reset to default"
+            >
+              ↺ Reset
+            </button>
+          )}
         </div>
-        {block.blockFontSize && (
-          <button onClick={() => onUpdate({ blockFontSize: undefined } as any)}
-            style={{ fontSize: '0.65rem', color: 'var(--color-muted)', background: 'none', border: 'none', cursor: 'pointer', marginTop: 2 }}>↺ Reset font size</button>
-        )}
       </div>
 
       {/* Block width */}
+
       <div>
         <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--color-text)', marginBottom: 6 }}>Block Width</div>
         <div style={{ display: 'flex', gap: 4 }}>
@@ -284,6 +324,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const fileRef = React.useRef<HTMLInputElement>(null);
   const selectedBlock = selectedBlockId ? newsletter.blocks[selectedBlockId] : null;
   const [selectedLayout, setSelectedLayout] = React.useState<RowLayout>('1col');
+  const [colorModalOpen, setColorModalOpen] = React.useState(false);
+  const [colorModalKey, setColorModalKey] = React.useState<string | null>(null);
+  const [colorModalLabel, setColorModalLabel] = React.useState<string>('');
+
+
+  const COLOR_PRESETS: { key: string; label: string; value: string }[] = [
+    { key: 'default', label: 'Default', value: '' },
+    { key: 'northwellBlue', label: 'Northwell Blue', value: '#003087' },
+    { key: 'accentBlue', label: 'Accent Blue', value: '#009CDE' },
+    { key: 'teal', label: 'Teal', value: '#00B5CC' },
+    { key: 'purple', label: 'Purple', value: '#7B2D8B' },
+    { key: 'green', label: 'Green', value: '#00A651' },
+    { key: 'orange', label: 'Orange', value: '#F47920' },
+    { key: 'red', label: 'Red', value: '#D72638' },
+    { key: 'slate', label: 'Slate', value: '#64748B' },
+    { key: 'black', label: 'Near Black', value: '#0A1628' },
+    { key: 'white', label: 'White', value: '#FFFFFF' },
+  ];
 
   const LAYOUTS: { value: RowLayout; label: string; icon: React.ReactNode }[] = [
     {
@@ -332,20 +390,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* ── BLOCKS PANEL ── */}
         {activePanel === 'blocks' && (
           <>
-            {/* Selected block info */}
-            {selectedBlock && (
-              <div className="panel-section" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: 16, marginBottom: 16 }}>
-                <div className="panel-section__title">Selected Block</div>
-                <BlockInfoPanel block={selectedBlock} onUpdate={updates => onUpdateBlock(selectedBlockId!, updates)} />
-                <BlockColorPanel block={selectedBlock} onUpdate={updates => onUpdateBlock(selectedBlockId!, updates)} />
-                <button
-                  onClick={() => setEditorState(s => ({ ...s, selectedBlockId: null }))}
-                  style={{ width: '100%', padding: '6px', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 4, background: 'none', fontSize: '0.75rem', cursor: 'pointer', marginTop: 12, color: 'var(--color-muted)' }}
-                >
-                  Deselect Block
-                </button>
-              </div>
-            )}
 
             {/* Block picker */}
             <div className="panel-section">
@@ -384,7 +428,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span className="block-pick-label">{BLOCK_LABEL_SHORT[type]}</span>
                   </button>
                 ))}
+              
+            {/* Selected block info */}
+            {selectedBlock && (
+              <div className="panel-section" style={{ borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: 16, marginBottom: 16 }}>
+                <div className="panel-section__title">Selected Block</div>
+                <BlockInfoPanel block={selectedBlock} onUpdate={updates => onUpdateBlock(selectedBlockId!, updates)} />
+                <BlockColorPanel block={selectedBlock} onUpdate={updates => onUpdateBlock(selectedBlockId!, updates)} />
+                <button
+                  onClick={() => setEditorState(s => ({ ...s, selectedBlockId: null }))}
+                  style={{ width: '100%', padding: '6px', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 4, background: 'none', fontSize: '0.75rem', cursor: 'pointer', marginTop: 12, color: 'var(--color-muted)' }}
+                >
+                  Deselect Block
+                </button>
               </div>
+            )}
+
+            </div>
             </div>
 
             <div className="panel-section">
@@ -435,32 +495,175 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             <div className="panel-section">
               <div className="panel-section__title">Custom Colors</div>
-              {[
-                { label: 'Primary Color', key: 'primaryColor' },
-                { label: 'Accent Color', key: 'accentColor' },
-                { label: 'Background', key: 'backgroundColor' },
-                { label: 'Surface / Cards', key: 'surfaceColor' },
-                { label: 'Body Text', key: 'textColor' },
-                { label: 'Muted Text', key: 'mutedColor' },
-              ].map(({ label, key }) => (
-                <div key={key} className="panel-field" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <label style={{ flex: 1, marginBottom: 0, fontSize: '0.75rem' }}>{label}</label>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <input
-                      type="color"
-                      value={(newsletter.theme as any)[key]}
-                      onChange={e => onThemeChange({ ...newsletter.theme, [key]: e.target.value })}
-                      style={{ width: 36, height: 30, padding: 2, border: '1px solid rgba(0,0,0,0.12)', borderRadius: 4, cursor: 'pointer' }}
-                    />
-                    <input
-                      type="text"
-                      value={(newsletter.theme as any)[key]}
-                      onChange={e => onThemeChange({ ...newsletter.theme, [key]: e.target.value })}
-                      style={{ width: 70, fontSize: '0.68rem', padding: '3px 6px', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 4, fontFamily: 'monospace' }}
-                    />
+              <div className="panel-section">
+                <div className="panel-section__title">Custom Colors</div>
+
+                <p style={{ fontSize: '0.72rem', color: 'var(--color-muted)', lineHeight: 1.5, marginTop: 0 }}>
+                  Use presets for a clean, consistent look. Need a custom hex? Click <strong>Custom…</strong>.
+                </p>
+
+                {[
+                  { label: 'Primary Color', key: 'primaryColor' },
+                  { label: 'Accent Color', key: 'accentColor' },
+                  { label: 'Background', key: 'backgroundColor' },
+                  { label: 'Surface / Cards', key: 'surfaceColor' },
+                  { label: 'Body Text', key: 'textColor' },
+                  { label: 'Muted Text', key: 'mutedColor' },
+                ].map(({ label, key }) => {
+                  const current = (newsletter.theme as any)[key] as string;
+
+                  const activePresetKey = (() => {
+                    const match = COLOR_PRESETS.find(p => p.value && p.value.toLowerCase() === current.toLowerCase());
+                    return match ? match.key : 'custom';
+                  })();
+
+                  return (
+                    <div key={key} className="panel-field" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <label style={{ flex: 1, marginBottom: 0, fontSize: '0.75rem' }}>{label}</label>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span
+                          aria-hidden
+                          title={current}
+                          style={{
+                            width: 14,
+                            height: 14,
+                            borderRadius: 999,
+                            background: current,
+                            border: '1px solid rgba(0,0,0,0.25)',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.10)',
+                          }}
+                        />
+
+                        <select
+                          value={activePresetKey}
+                          onChange={e => {
+                            const k = e.target.value;
+                            if (k === 'custom') {
+                              setColorModalKey(key);
+                              setColorModalLabel(label);
+                              setColorModalOpen(true);
+                              return;
+                            }
+                            const preset = COLOR_PRESETS.find(p => p.key === k);
+                            const next = preset?.value || current;
+                            if (preset?.key === 'default') return; // no-op for now
+                            onThemeChange({ ...newsletter.theme, [key]: next });
+                          }}
+                          style={{
+                            fontSize: '0.74rem',
+                            padding: '6px 8px',
+                            borderRadius: 6,
+                            border: '1px solid rgba(0,0,0,0.14)',
+                            background: 'rgba(255,255,255,0.92)',
+                            minWidth: 150,
+                          }}
+                        >
+                          {COLOR_PRESETS.filter(p => p.key !== 'default').map(p => (
+                            <option key={p.key} value={p.key}>{p.label}</option>
+                          ))}
+                          <option value="custom">Custom…</option>
+                        </select>
+
+                        <button
+                          className="upload-btn"
+                          onClick={() => {
+                            setColorModalKey(key);
+                            setColorModalLabel(label);
+                            setColorModalOpen(true);
+                          }}
+                          style={{ padding: '6px 10px' }}
+                        >
+                          Custom…
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {colorModalOpen && colorModalKey && (
+                  <div
+                    role="dialog"
+                    aria-modal="true"
+                    style={{
+                      position: 'fixed',
+                      inset: 0,
+                      background: 'rgba(0,0,0,0.45)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 9999,
+                      padding: 16,
+                    }}
+                    onMouseDown={() => setColorModalOpen(false)}
+                  >
+                    <div
+                      style={{
+                        width: 'min(560px, 96vw)',
+                        background: 'var(--color-surface)',
+                        border: '1px solid rgba(0,0,0,0.12)',
+                        borderRadius: 12,
+                        boxShadow: '0 18px 60px rgba(0,0,0,0.35)',
+                        padding: 16,
+                      }}
+                      onMouseDown={e => e.stopPropagation()}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div style={{ fontWeight: 800, letterSpacing: '0.02em' }}>{colorModalLabel}</div>
+                        <button className="upload-btn upload-btn--danger" onClick={() => setColorModalOpen(false)}>✕</button>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+                        <input
+                          type="color"
+                          value={(newsletter.theme as any)[colorModalKey]}
+                          onChange={e => onThemeChange({ ...newsletter.theme, [colorModalKey]: e.target.value })}
+                          style={{ width: 64, height: 44, padding: 4, border: '1px solid rgba(0,0,0,0.12)', borderRadius: 10, cursor: 'pointer' }}
+                        />
+                        <input
+                          type="text"
+                          value={(newsletter.theme as any)[colorModalKey]}
+                          onChange={e => onThemeChange({ ...newsletter.theme, [colorModalKey]: e.target.value })}
+                          style={{ flex: 1, fontSize: '0.9rem', padding: '10px 12px', border: '1px solid rgba(0,0,0,0.14)', borderRadius: 10, fontFamily: 'monospace' }}
+                        />
+                        <button className="upload-btn" onClick={() => setColorModalOpen(false)} style={{ padding: '10px 12px' }}>
+                          Done
+                        </button>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 10 }}>
+                        {COLOR_PRESETS.filter(p => p.value).map(p => (
+                          <button
+                            key={p.key}
+                            onClick={() => onThemeChange({ ...newsletter.theme, [colorModalKey]: p.value })}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 8,
+                              padding: '8px 10px',
+                              borderRadius: 10,
+                              border: '1px solid rgba(0,0,0,0.12)',
+                              background: 'rgba(255,255,255,0.85)',
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                              fontSize: '0.75rem',
+                            }}
+                            title={p.value}
+                          >
+                            <span style={{ width: 14, height: 14, borderRadius: 999, background: p.value, border: '1px solid rgba(0,0,0,0.25)' }} />
+                            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.label}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div style={{ marginTop: 12, fontSize: '0.72rem', color: 'var(--color-muted)', lineHeight: 1.5 }}>
+                        Tip: Use presets for consistency. Custom colors are great for special issues, but can make spacing/contrast harder to keep uniform.
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )}
+              </div>
+
             </div>
           </>
         )}
