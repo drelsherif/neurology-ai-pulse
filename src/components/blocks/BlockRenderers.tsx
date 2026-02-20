@@ -1,4 +1,5 @@
 import React from 'react';
+import RichTextEditor from '../editor/RichTextEditor';
 import NeurologyAIPulseLogo from '../branding/NeurologyAIPulseLogo';
 import { v4 as uuidv4 } from 'uuid';
 import type {
@@ -22,32 +23,47 @@ interface EditableProps {
 export const Editable: React.FC<EditableProps> = ({
   value, tag = 'span', className, onChange, placeholder, style
 }) => {
-  const ref = React.useRef<HTMLElement>(null);
-  const [focused, setFocused] = React.useState(false);
+  // Inline usage (span) stays lightweight and plain-text to avoid invalid DOM nesting.
+  if (tag === 'span') {
+    const ref = React.useRef<HTMLElement>(null);
+    const [focused, setFocused] = React.useState(false);
 
-  const handleBlur = () => {
-    setFocused(false);
-    if (ref.current) onChange(ref.current.innerText.trim());
-  };
+    const handleBlur = () => {
+      setFocused(false);
+      if (ref.current) onChange(ref.current.innerText);
+    };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') { if (ref.current) ref.current.blur(); }
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { handleBlur(); }
-  };
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') { if (ref.current) ref.current.blur(); }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { handleBlur(); }
+    };
 
-  return React.createElement(tag, {
-    ref,
-    className: `editable ${className || ''}`,
-    contentEditable: true,
-    suppressContentEditableWarning: true,
-    onFocus: () => setFocused(true),
-    onBlur: handleBlur,
-    onKeyDown: handleKeyDown,
-    style: { ...style, outline: 'none', minHeight: '1em', cursor: 'text' },
-    'data-placeholder': !value && !focused ? (placeholder || 'Click to edit…') : undefined,
-    children: value,
-  });
+    return React.createElement(tag, {
+      ref,
+      className: `editable ${className || ''}`,
+      contentEditable: true,
+      suppressContentEditableWarning: true,
+      onFocus: () => setFocused(true),
+      onBlur: handleBlur,
+      onKeyDown: handleKeyDown,
+      style: { ...style, outline: 'none', minHeight: '1em', cursor: 'text' },
+      'data-placeholder': !value && !focused ? (placeholder || 'Click to edit…') : undefined,
+      children: value,
+    });
+  }
+
+  // Block usage uses TipTap (RichTextEditor) to support Word-like selection formatting.
+  return (
+    <RichTextEditor
+      value={value || ''}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={className}
+      minimal={['h1','h2','h3','h4','h5','h6'].includes(tag) || (className || '').includes('block-header__')}
+    />
+  );
 };
+
 
 // ─── Image upload hook ─────────────────────────────────────────────────────
 
