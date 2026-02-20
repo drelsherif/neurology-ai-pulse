@@ -621,3 +621,191 @@
   font-size: 0.72rem;
   opacity: 0.5;
 }
+
+/* ─── SBAR Prompt Framework ─────────────────────────────────────── */
+.block-sbar {
+  background: #0B1628;
+  color: #E2E8F0;
+  overflow: hidden;
+}
+
+.sbar__header {
+  padding: 28px 36px 20px;
+  background: linear-gradient(135deg, #0F1F3D 0%, #0B1628 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+
+.sbar__badge {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #38BDF8;
+  margin-bottom: 10px;
+}
+
+.sbar__title {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  color: #FFFFFF;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.sbar__intro {
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.55);
+  max-width: 600px;
+  margin: 0 auto 18px;
+}
+
+.sbar__acronym {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.sbar__acronym-letter {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sbar__acronym-sub {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.06em;
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+.sbar__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sbar__step {
+  padding: 20px 18px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  border-top: 3px solid #38BDF8;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: background 0.18s;
+}
+
+.sbar__step:last-child { border-right: none; }
+.sbar__step:hover { background: rgba(255,255,255,0.04); }
+
+.sbar__step-letter {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sbar__step-name {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 2px;
+}
+
+.sbar__step-desc {
+  font-size: 0.68rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.45);
+  flex: 1;
+}
+
+.sbar__step-example {
+  font-size: 0.62rem;
+  font-style: italic;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.55;
+  padding: 8px;
+  background: rgba(255,255,255,0.04);
+  border-left: 2px solid rgba(56,189,248,0.4);
+  border-radius: 0 4px 4px 0;
+  margin-top: 4px;
+}
+
+.sbar__prompt-section {
+  padding: 22px 36px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sbar__prompt-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 10px;
+}
+
+.sbar__prompt-code {
+  background: #131F35;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-left: 3px solid #38BDF8;
+  border-radius: 0 6px 6px 0;
+  padding: 16px 18px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #7DD3FC;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sbar__safety {
+  padding: 20px 36px 24px;
+  background: rgba(139,92,246,0.06);
+}
+
+.sbar__safety-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #A78BFA;
+  margin-bottom: 14px;
+}
+
+.sbar__safety-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.sbar__safety-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.sbar__safety-check {
+  color: #34D399;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.sbar__safety-text {
+  font-size: 0.67rem;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.5);
+}

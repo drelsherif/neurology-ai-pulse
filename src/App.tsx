@@ -16,7 +16,7 @@ export default function App() {
 
   const {
     newsletter, updateBlock, addBlock, removeBlock,
-    moveBlockUp, moveBlockDown, updateTheme, updateMeta, loadNewsletter,
+    moveBlockUp, moveBlockDown, updateRowLayout, updateTheme, updateMeta, loadNewsletter,
   } = useNewsletter();
 
   const {
@@ -132,7 +132,7 @@ export default function App() {
           newsletter={newsletter}
           editorState={editorState}
           setEditorState={setEditorState}
-          onAddBlock={(type: BlockType) => addBlock(type)}
+          onAddBlock={(type: BlockType, layout) => addBlock(type, editorState.selectedBlockId || undefined, layout)}
           onThemeChange={handleThemeChange as any}
           onUpdateMeta={updateMeta}
           onUpdateBlock={updateBlock}
@@ -153,6 +153,7 @@ export default function App() {
           onRemoveBlock={removeBlock}
           onMoveRowUp={moveBlockUp}
           onMoveRowDown={moveBlockDown}
+          onUpdateRowLayout={updateRowLayout}
         />
       </div>
     </div>

@@ -10,6 +10,7 @@ export type BlockType =
   | 'image'
   | 'text'
   | 'prompt-masterclass'
+  | 'sbar-prompt'
   | 'term-of-month'
   | 'history'
   | 'humor'
@@ -40,8 +41,12 @@ export interface ArticleItem {
 export interface BlockBase {
   id: string;
   type: BlockType;
+  // Visual overrides
   blockBgColor?: string;
   blockTextColor?: string;
+  blockPadding?: number;       // px, applied as padding top/bottom
+  blockFontSize?: number;      // px, base font size override
+  blockWidth?: '25' | '50' | '75' | '100'; // % width within its column
 }
 
 export interface HeaderBlock extends BlockBase {
@@ -138,18 +143,43 @@ export interface HumorBlock extends BlockBase {
 
 export interface SpacerBlock extends BlockBase {
   type: 'spacer';
-  height: number; // px
+  height: number;
+}
+
+export interface Contributor {
+  id: string;
+  name: string;
+  role: string;
+  url?: string;
 }
 
 export interface FooterBlock extends BlockBase {
   type: 'footer';
   institution: string;
   department: string;
+  contactEmail?: string;
   unsubscribeUrl: string;
   websiteUrl: string;
   copyrightYear: string;
   disclaimer: string;
   socials: { platform: string; url: string }[];
+  contributors: Contributor[];
+}
+
+export interface SbarStep {
+  letter: string;  // S, B, A, R, P
+  name: string;    // e.g. "Situation"
+  description: string;
+  example: string;
+}
+
+export interface SbarPromptBlock extends BlockBase {
+  type: 'sbar-prompt';
+  title: string;
+  intro: string;
+  steps: SbarStep[];
+  promptTemplate: string;  // the full editable prompt example
+  safetyNotes: string[];
 }
 
 export type Block =
@@ -162,6 +192,7 @@ export type Block =
   | ImageBlock
   | TextBlock
   | PromptMasterclassBlock
+  | SbarPromptBlock
   | TermOfMonthBlock
   | HistoryBlock
   | HumorBlock

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type {
   HeaderBlock, TickerBlock, SectionDividerBlock, ArticleGridBlock,
   SpotlightBlock, EthicsSplitBlock, ImageBlock, TextBlock,
-  PromptMasterclassBlock, TermOfMonthBlock, HistoryBlock, HumorBlock,
+  PromptMasterclassBlock, SbarPromptBlock, SbarStep, TermOfMonthBlock, HistoryBlock, HumorBlock,
   SpacerBlock, FooterBlock, Block, ArticleItem, ArticleComment,
 } from '../../types';
 
@@ -529,6 +529,103 @@ export const PromptMasterclassBlockView: React.FC<{ block: PromptMasterclassBloc
 );
 
 // ═══════════════════════════════════════════════════════════
+// SBAR-P PROMPT FRAMEWORK BLOCK
+// ═══════════════════════════════════════════════════════════
+
+const SBAR_ACCENT_COLORS: Record<string, string> = {
+  S: '#38BDF8', B: '#818CF8', A: '#34D399', R: '#FB923C', P: '#F472B6',
+};
+
+export const SbarPromptBlockView: React.FC<{ block: SbarPromptBlock; update: UpdateFn<SbarPromptBlock>; editable?: boolean }> = ({ block, update, editable }) => {
+  const updateStep = (i: number, field: keyof SbarStep, value: string) => {
+    const steps = [...block.steps];
+    steps[i] = { ...steps[i], [field]: value };
+    update({ steps });
+  };
+  const updateSafetyNote = (i: number, value: string) => {
+    const notes = [...block.safetyNotes];
+    notes[i] = value;
+    update({ safetyNotes: notes });
+  };
+
+  return (
+    <div className="block-sbar">
+      <div className="sbar__header">
+        <div className="sbar__badge">🤖 PROMPTING FRAMEWORK</div>
+        <Editable value={block.title} tag="div" className="sbar__title" onChange={v => update({ title: v })} placeholder="Framework Title" />
+        <Editable value={block.intro} tag="p" className="sbar__intro" onChange={v => update({ intro: v })} placeholder="Intro text…" />
+        <div className="sbar__acronym">
+          {block.steps.map(s => (
+            <span key={s.letter} className="sbar__acronym-letter" style={{ color: SBAR_ACCENT_COLORS[s.letter] || '#38BDF8' }}>
+              {s.letter}
+            </span>
+          ))}
+        </div>
+        <div className="sbar__acronym-sub">
+          {block.steps.map((s, i) => (
+            <span key={s.letter}>
+              <Editable value={s.name} tag="span" onChange={v => updateStep(i, 'name', v)} style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.6rem' }} />
+              {i < block.steps.length - 1 && <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>·</span>}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Step cards */}
+      <div className="sbar__steps">
+        {block.steps.map((step, i) => (
+          <div key={step.letter} className="sbar__step" style={{ borderTopColor: SBAR_ACCENT_COLORS[step.letter] || '#38BDF8' }}>
+            <div className="sbar__step-letter" style={{ color: SBAR_ACCENT_COLORS[step.letter] || '#38BDF8' }}>
+              <Editable value={step.letter} tag="span" onChange={v => updateStep(i, 'letter', v)} />
+            </div>
+            <div className="sbar__step-name">
+              <Editable value={step.name} tag="span" onChange={v => updateStep(i, 'name', v)} placeholder="Name" />
+            </div>
+            <div className="sbar__step-desc">
+              <Editable value={step.description} tag="p" onChange={v => updateStep(i, 'description', v)} placeholder="Describe this step…" />
+            </div>
+            <div className="sbar__step-example">
+              <Editable value={step.example} tag="span" onChange={v => updateStep(i, 'example', v)} placeholder="e.g. example phrase…" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Full prompt template */}
+      <div className="sbar__prompt-section">
+        <div className="sbar__prompt-label">📋 Prompt Template — click to edit</div>
+        <Editable value={block.promptTemplate} tag="div" className="sbar__prompt-code" onChange={v => update({ promptTemplate: v })} placeholder="Paste your full prompt template here…" />
+      </div>
+
+      {/* Safety notes */}
+      {block.safetyNotes.length > 0 && (
+        <div className="sbar__safety">
+          <div className="sbar__safety-title">⚠️ AI Safety Reminders</div>
+          <div className="sbar__safety-grid">
+            {block.safetyNotes.map((note, i) => (
+              <div key={i} className="sbar__safety-item">
+                <span className="sbar__safety-check">✓</span>
+                <Editable value={note} tag="span" className="sbar__safety-text" onChange={v => updateSafetyNote(i, v)} placeholder="Safety note…" />
+                {editable && (
+                  <button onClick={() => update({ safetyNotes: block.safetyNotes.filter((_, idx) => idx !== i) })}
+                    style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: '0.7rem', marginLeft: 4 }}>✕</button>
+                )}
+              </div>
+            ))}
+          </div>
+          {editable && (
+            <button onClick={() => update({ safetyNotes: [...block.safetyNotes, 'New safety note…'] })}
+              style={{ marginTop: 10, padding: '3px 12px', background: 'none', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 99, color: 'rgba(255,255,255,0.6)', fontSize: '0.65rem', cursor: 'pointer' }}>
+              + Add Note
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════
 // TERM OF MONTH
 // ═══════════════════════════════════════════════════════════
 
@@ -593,15 +690,29 @@ export const FooterBlockView: React.FC<{ block: FooterBlock; update: UpdateFn<Fo
       <div>
         <Editable value={block.institution} tag="div" className="footer__brand" onChange={v => update({ institution: v })} placeholder="Institution" />
         <Editable value={block.department} tag="div" className="footer__dept" onChange={v => update({ department: v })} placeholder="Department" />
+        <div style={{ marginTop: 6, fontSize: '0.72rem', opacity: 0.75 }}>
+          {editable ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>📧</span>
+              <input value={block.contactEmail || ''} onChange={e => update({ contactEmail: e.target.value })}
+                placeholder="contact@email.com"
+                style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', width: 180 }} />
+            </div>
+          ) : block.contactEmail ? (
+            <a href={`mailto:${block.contactEmail}`} style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>
+              📧 {block.contactEmail}
+            </a>
+          ) : null}
+        </div>
       </div>
       <div className="footer__socials">
         {block.socials.map((s, i) => (
           editable ? (
-            <div key={i} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <div key={i} style={{ display: 'flex', gap: 4, alignItems: 'center', marginBottom: 4 }}>
               <input value={s.platform} onChange={e => { const soc = [...block.socials]; soc[i] = { ...s, platform: e.target.value }; update({ socials: soc }); }}
-                style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', width: 70 }} />
+                style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', width: 80 }} />
               <input value={s.url} onChange={e => { const soc = [...block.socials]; soc[i] = { ...s, url: e.target.value }; update({ socials: soc }); }}
-                style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', width: 100 }} />
+                style={{ fontSize: '0.65rem', padding: '2px 6px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', width: 110 }} />
               <button onClick={() => update({ socials: block.socials.filter((_, idx) => idx !== i) })}
                 style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '0.8rem' }}>✕</button>
             </div>
@@ -611,12 +722,45 @@ export const FooterBlockView: React.FC<{ block: FooterBlock; update: UpdateFn<Fo
         ))}
         {editable && (
           <button onClick={() => update({ socials: [...block.socials, { platform: 'Platform', url: '#' }] })}
-            style={{ padding: '3px 10px', borderRadius: 99, border: '1px solid rgba(255,255,255,0.3)', background: 'none', color: '#fff', fontSize: '0.72rem', cursor: 'pointer' }}>
-            + Add
+            style={{ padding: '3px 10px', borderRadius: 99, border: '1px solid rgba(255,255,255,0.3)', background: 'none', color: '#fff', fontSize: '0.7rem', cursor: 'pointer', marginTop: 4 }}>
+            + Add Social
           </button>
         )}
       </div>
     </div>
+
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.5, marginBottom: 8 }}>Contributors</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {((block as any).contributors || []).map((c: any, i: number) => (
+          editable ? (
+            <div key={c.id} style={{ display: 'flex', gap: 4, alignItems: 'center', background: 'rgba(255,255,255,0.08)', borderRadius: 6, padding: '4px 8px' }}>
+              <input value={c.name} onChange={e => { const cs = [...((block as any).contributors||[])]; cs[i] = { ...c, name: e.target.value }; update({ contributors: cs } as any); }}
+                placeholder="Name" style={{ fontSize: '0.65rem', padding: '2px 5px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', width: 110 }} />
+              <input value={c.role} onChange={e => { const cs = [...((block as any).contributors||[])]; cs[i] = { ...c, role: e.target.value }; update({ contributors: cs } as any); }}
+                placeholder="Role" style={{ fontSize: '0.65rem', padding: '2px 5px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', width: 90 }} />
+              <input value={c.url || ''} onChange={e => { const cs = [...((block as any).contributors||[])]; cs[i] = { ...c, url: e.target.value }; update({ contributors: cs } as any); }}
+                placeholder="URL" style={{ fontSize: '0.65rem', padding: '2px 5px', borderRadius: 4, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.1)', color: '#fff', width: 100 }} />
+              <button onClick={() => update({ contributors: ((block as any).contributors||[]).filter((_: any, idx: number) => idx !== i) } as any)}
+                style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', fontSize: '0.75rem' }}>✕</button>
+            </div>
+          ) : (
+            <div key={c.id} style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.75)' }}>
+              {c.url ? <a href={c.url} target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,0.85)', textDecoration: 'none', fontWeight: 600 }}>{c.name}</a>
+                : <span style={{ fontWeight: 600 }}>{c.name}</span>}
+              {c.role && <span style={{ opacity: 0.6 }}> · {c.role}</span>}
+            </div>
+          )
+        ))}
+      </div>
+      {editable && (
+        <button onClick={() => update({ contributors: [...((block as any).contributors||[]), { id: Date.now().toString(), name: 'Contributor', role: 'Role', url: '' }] } as any)}
+          style={{ marginTop: 8, padding: '3px 10px', borderRadius: 99, border: '1px solid rgba(255,255,255,0.3)', background: 'none', color: '#fff', fontSize: '0.7rem', cursor: 'pointer' }}>
+          + Add Contributor
+        </button>
+      )}
+    </div>
+
     <hr className="footer__divider" />
     <Editable value={block.disclaimer} tag="div" className="footer__disclaimer" onChange={v => update({ disclaimer: v })} placeholder="Disclaimer text…" />
     <div className="footer__bottom">
@@ -657,6 +801,7 @@ export const BlockRenderer: React.FC<BlockRendererProps> = ({ block, update, edi
     case 'image':              return <ImageBlockView block={block} update={u} editable={editable} />;
     case 'text':               return <TextBlockView block={block} update={u} />;
     case 'prompt-masterclass': return <PromptMasterclassBlockView block={block} update={u} />;
+    case 'sbar-prompt':        return <SbarPromptBlockView block={block as SbarPromptBlock} update={u as any} editable={editable} />;
     case 'term-of-month':      return <TermOfMonthBlockView block={block} update={u} />;
     case 'history':            return <HistoryBlockView block={block} update={u} />;
     case 'humor':              return <HumorBlockView block={block} update={u} />;

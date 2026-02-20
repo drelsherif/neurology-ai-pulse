@@ -83,6 +83,25 @@ function buildHTML(newsletter: Newsletter, previewEl: HTMLElement): string {
     '.block-controls, .row-controls, [data-editor-only], .upload-btn, .add-article-btn, .comment-add, .comment-delete'
   ).forEach(el => el.remove());
 
+  // Remove scoped block style tags injected by the editor
+  clone.querySelectorAll('style').forEach(el => el.remove());
+
+  // Re-apply block overrides as inline styles on the block element itself
+  // so they survive in the exported HTML without needing the scoped <style> tags
+  clone.querySelectorAll('[id^="block-"]').forEach(el => {
+    const blockEl = el as HTMLElement;
+    const firstChild = blockEl.firstElementChild as HTMLElement | null;
+    if (!firstChild) return;
+    const bg = blockEl.dataset.blockBg;
+    const color = blockEl.dataset.blockColor;
+    const padding = blockEl.dataset.blockPadding;
+    const fontSize = blockEl.dataset.blockFontSize;
+    if (bg) firstChild.style.background = bg;
+    if (color) { firstChild.style.color = color; blockEl.style.color = color; }
+    if (padding) { firstChild.style.paddingTop = padding + 'px'; firstChild.style.paddingBottom = padding + 'px'; }
+    if (fontSize) firstChild.style.fontSize = fontSize + 'px';
+  });
+
   // Remove contenteditable attributes
   clone.querySelectorAll('[contenteditable]').forEach(el => {
     el.removeAttribute('contenteditable');
